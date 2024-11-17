@@ -1,21 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sandbox.ModAPI.Ingame;
 using VRageMath;
 
 namespace IngameScript
 {
-
-    using System;
-    using System.Collections.Generic;
-    using VRageMath;
-    using Sandbox.ModAPI.Ingame;
-    using Sandbox.Game.Entities;
-    using SpaceEngineers.Game.ModAPI.Ingame;
-
     public class BezierOptimizer
     {
         public Vector3D P0;  // Starting point of the curve
@@ -43,16 +31,18 @@ namespace IngameScript
         }
 
         // Function to optimize the trajectory
-        public void Optimize()
+        public Vector3D Optimize()
         {
             double tolerance = 0.01;  // Convergence tolerance
             double learningRate = 0.1;  // Initial learning rate
+            int iterations = 0;
+            int maxIterations = 1000; //threshold to stop iterating
             double initialLearningRate = learningRate;  // Store the initial learning rate
             double cost = CalculateCost(P1);  // Calculate the initial cost
-            double lastCost = cost;  // Last calculated cost
+            double lastCost;  // Last calculated cost
 
             // Continue optimizing while the cost is greater than the tolerance
-            while (cost > tolerance)
+            while (cost > tolerance && iterations <= maxIterations)
             {
                 // Calculate the gradient
                 Vector3D gradient = CalculateGradient(P1);
@@ -77,7 +67,12 @@ namespace IngameScript
 
                 // Limit the learning rate to avoid extreme updates
                 learningRate = Math.Min(learningRate, initialLearningRate * 10);
+                // Exit if the gradient is very small (close to convergence)
+                if (gradient.Length() < 1e-5)
+                    break;
+                iterations++;
             }
+            return P1;
         }
 
         // Calculate the cost of the trajectory with adaptive sampling and the collision constraint with spheres
@@ -223,7 +218,24 @@ namespace IngameScript
                 Radius = radius;
             }
         }
+
+        // Genera una lista di waypoint a partire dalla curva ottimizzata
+        public List<Vector3D> GenerateWaypoints(int numWaypoints)
+        {
+            List<Vector3D> waypoints = new List<Vector3D>();
+
+            double tStep = 1.0 / (numWaypoints - 1); // Calcolo del passo tra i punti
+
+            for (int i = 0; i < numWaypoints; i++)
+            {
+                double t = i * tStep; // Valore di t per il punto corrente
+                waypoints.Add(CalculatePointOnCurve(t, P1)); // Calcola il punto sulla curva
+            }
+
+            return waypoints;
+        }
+
     }
-    
+
 
 }

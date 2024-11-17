@@ -18,8 +18,8 @@ namespace IngameScript
 
     public class BezierOptimizer
     {
-        public Vector3D P0 = new Vector3D(0, 0, 0);  // Starting point of the curve
-        public Vector3D P2 = new Vector3D(100, 0, 0);  // End point of the curve
+        public Vector3D P0;  // Starting point of the curve
+        public Vector3D P2;  // End point of the curve
         public Vector3D P1;  // Control point of the curve (initially set as the midpoint between P0 and P2)
 
         public double InitialVelocity;  // Initial velocity in meters per second
@@ -29,10 +29,13 @@ namespace IngameScript
         public List<Sphere> Spheres;
 
         // Constructor for the optimizer
-        public BezierOptimizer(double initialVelocity, double maxAcceleration, List<Sphere> spheres)
+        public BezierOptimizer(double initialVelocity, double maxAcceleration, List<Sphere> spheres,
+            Vector3D start, Vector3D end)
         {
             InitialVelocity = initialVelocity;
             MaxAcceleration = maxAcceleration;
+            P0 = start;
+            P2 = end;
             Spheres = spheres;
 
             // Initialize P1 as the midpoint between P0 and P2
